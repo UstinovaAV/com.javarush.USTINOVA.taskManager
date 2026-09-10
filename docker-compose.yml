@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  #СЕРВИС 1: База данных PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: taskmanager-db
+    environment:
+      POSTGRES_DB: taskmanager
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres #пароль в учебных целях следан простым
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    # Healthcheck - проверка, что БД готова принимать соединения
+    # Приложение не запустится, пока БД не пройдет эту проверку
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s        # Проверять каждые 5 секунд
+      timeout: 5s         # Таймаут на проверку
+      retries: 5          # Попыток до признания "мертвым"
+
+  # Cервис 2. Само spring boot приложение
+  app:
+    # Собрать образ из Dockerfile в текущей папке (.)
+    build: .
+
+    # Имя контейнера
+    container_name: taskmanager-app
+
+    # Проброс порта приложения
+    # Открываем http://localhost:8080 в браузере
+    ports:
+      - "8080:8080"
+
+    # Переменные окружения для Spring Boot
+    # Переопределяют значения из application.yml
+    environment:
+      # ВАЖНО: 'db' - это имя сервиса выше! Docker сам разрешит его в IP контейнера
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/taskmanager
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      # Указываем Hibernate не трогать схему (таблицы создает Liquibase)
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      # Включаем Liquibase
+      SPRING_LIQUIBASE_ENABLED: "true"
+
+    # Зависимости между сервисами
+    # Приложение не запустится, пока БД не будет готова
+    depends_on:
+      db:
+        condition: service_healthy  # Ждем, пока БД пройдет healthcheck
+
+
+# VOLUMES - тома для сохранения данных
+
+volumes:
+  # Том для PostgreSQL - данные БД сохраняются между перезапусками
+  postgres_data:

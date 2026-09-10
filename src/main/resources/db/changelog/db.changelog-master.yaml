@@ -1,0 +1,7 @@
+databaseChangeLog:
+  # Сначала создаем пользователей
+  - include:
+      file: db/changelog/001-create-users-table.yaml
+  # Потом создаем задачи, которые ссылаются на пользователей
+  - include:
+      file: db/changelog/002-create-tasks-table.yaml
