@@ -24,25 +24,25 @@ public class DataInitializer implements CommandLineRunner {
         // Заполняем БД только если она пустая
         if (userRepository.count() == 0) {
 
-            // 1. Создаем Админа
+            // Создаем Админа
             User admin = User.builder()
                     .username("Юрий")
                     .email("admin@taskmanager.dev")
-                    .password("admin123") // Пока текстом, потом будет зашифровано
+                    .password("{noop}admin123") // Пока текстом, потом будет зашифровано
                     .role(Role.ADMIN)
                     .build();
             userRepository.save(admin);
 
-            // 2. Создаем Обычного пользователя
+            // Создаем Обычного пользователя
             User user = User.builder()
                     .username("Анжелика Устинова")
                     .email("anzhelika@test.com")
-                    .password("password123")
+                    .password("{noop}password123")
                     .role(Role.USER)
                     .build();
             userRepository.save(user);
 
-            // 3. Создаем тестовые задачи для Админа
+            // Создаем тестовые задачи для Админа
             Task task1 = Task.builder()
                     .title("Подать показания счетчика холодной воды")
                     .description("Нужно своевременно подавать показания в УК")
@@ -60,7 +60,7 @@ public class DataInitializer implements CommandLineRunner {
                     .build();
             taskRepository.save(task2);
 
-            // 4. Создаем тестовые задачи для Пользователя
+            // Создаем тестовые задачи для Пользователя
             Task task3 = Task.builder()
                     .title("Реализовать REST API")
                     .description("Написать контроллеры и сервисы для задач")

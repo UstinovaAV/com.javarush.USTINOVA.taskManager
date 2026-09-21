@@ -5,3 +5,6 @@ databaseChangeLog:
   # Потом создаем задачи, которые ссылаются на пользователей
   - include:
       file: db/changelog/002-create-tasks-table.yaml
+  # Модифицируем таблицу пользователей для Soft Delete
+  - include:
+      file: db/changelog/003-add-soft-delete-to-users.yaml

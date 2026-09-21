@@ -41,7 +41,7 @@ public class Task {
     private TaskStatus status;
 
 
-    //    user_id (FK -> USER.id)
+    //    user_id (FK - USER.id)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @ToString.Exclude

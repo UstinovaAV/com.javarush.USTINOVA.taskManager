@@ -8,6 +8,7 @@ import com.javarush.ustinova.taskManager.entity.enums.TaskStatus;
 import com.javarush.ustinova.taskManager.repository.TaskRepository;
 import com.javarush.ustinova.taskManager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,12 +17,14 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
 
     @Transactional
     public TaskDto createTask(CreateTaskRequest request, Long userId) {
+        log.info("Начало создания задачи для пользователя ID={}", userId);
         User user =userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Пользователь с id " + userId + " не найден"));
 
@@ -35,7 +38,13 @@ public class TaskService {
                 .build();
 
         Task savedTask = taskRepository.save(task);
+        log.info("Задача успешно создана. ID={}, Title={}", task.getId(), task.getTitle());
         return mapToDto(savedTask);
+    }
+    public List<TaskDto> getAllTasks() {
+        return taskRepository.findAll().stream()
+                .map(this::mapToDto) // <-- Убедись, что твой метод маппинга называется именно так
+                .toList();
     }
 
     public List<TaskDto> getTasksByUser(Long userId) {
@@ -53,15 +62,18 @@ public class TaskService {
                 .orElseThrow(() -> new RuntimeException("Задача с ID " + taskId + " не найдена"));
 
         task.setStatus(newStatus);
+        log.info("Статус задачи ID={} изменен на {}", taskId,  newStatus);
         return mapToDto(task); // save не нужен, т.к. объект управляемый (managed), Hibernate сам обновит БД при коммите
     }
 
     @Transactional
     public void deleteTask(Long taskId) {
+        log.info("Попытка удаления задачи ID={}", taskId);
         if (!taskRepository.existsById(taskId)) {
             throw new RuntimeException("Задача с ID " + taskId + " не найдена");
         }
         taskRepository.deleteById(taskId);
+        log.info("Задача ID={} успешно удалена", taskId);
     }
 
     private TaskDto mapToDto(Task task) {

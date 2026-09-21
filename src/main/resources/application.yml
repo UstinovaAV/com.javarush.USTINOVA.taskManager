@@ -3,7 +3,8 @@ spring:
     name: taskManager
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/taskmanager
+    # Если  через docker-compose, здесь должно быть 'db', а не 'localhost'
+    url: jdbc:postgresql://db:5432/taskmanager
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -23,3 +24,24 @@ spring:
 
 server:
   port: 8080
+
+
+# Настройка логирования
+
+logging:
+  file:
+    name: logs/application.log  # Путь к файлу логов
+  level:
+    root: INFO                  # Базовый уровень для всех библиотек
+    com.javarush.ustinova.taskmanager: DEBUG  # Для кода детальные логи
+    org.springframework.security: WARN
+
+
+#  Актуатор
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # открытие эндпоинтов
+        include: health, info, metrics, prometheus
